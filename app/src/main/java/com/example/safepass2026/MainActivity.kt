@@ -3,37 +3,36 @@ package com.example.safepass2026
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import com.example.safepass2026.data.repository.InMemoryTaskRepository
-import com.example.safepass2026.domain.usecase.AddTaskUseCase
-import com.example.safepass2026.domain.usecase.GetTasksUseCase
-import com.example.safepass2026.ui.presentation.tasks.AcademicTaskApp
-import com.example.safepass2026.ui.presentation.tasks.AcademicTaskViewModel
-import com.example.safepass2026.ui.presentation.tasks.AcademicTaskViewModelFactory
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.safepass2026.data.repository.InMemoryGradeRepository
+import com.example.safepass2026.domain.usecase.AddGradeUseCase
+import com.example.safepass2026.domain.usecase.GetGradesUseCase
+import com.example.safepass2026.ui.presentation.grades.GradeAppScreen
+import com.example.safepass2026.ui.presentation.grades.GradeViewModel
 import com.example.safepass2026.ui.theme.SafePass2026Theme
 
 class MainActivity : ComponentActivity() {
 
-    private val repository by lazy { InMemoryTaskRepository() }
-    private val getTasksUseCase by lazy { GetTasksUseCase(repository) }
-    private val addTaskUseCase by lazy { AddTaskUseCase(repository) }
-
-    private val viewModel: AcademicTaskViewModel by viewModels {
-        AcademicTaskViewModelFactory(
-            getTasksUseCase,
-            addTaskUseCase,
-            repository
-        )
+    private val viewModel: GradeViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val repository = InMemoryGradeRepository()
+                val getGradesUseCase = GetGradesUseCase(repository)
+                val addGradeUseCase = AddGradeUseCase(repository)
+                return GradeViewModel(getGradesUseCase, addGradeUseCase) as T
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         setContent {
             SafePass2026Theme {
-                AcademicTaskApp(viewModel = viewModel)
+                GradeAppScreen(viewModel = viewModel)
             }
         }
     }
